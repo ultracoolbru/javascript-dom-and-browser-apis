@@ -4,6 +4,8 @@ class DOMHelper {
         const destinationElement = document.querySelector(newDestinationSelector);
         destinationElement.append(element);
         element.scrollIntoView({ behavior: 'smooth' });
+
+        // element.scrollBy({ top: 50, behavior: 'smooth' });
     }
 
     static clearEventListeners(element) {
@@ -55,7 +57,20 @@ class Tooltip extends Component {
     create() {
         const tooltipElement = document.createElement('div');
         tooltipElement.className = 'card';
-        tooltipElement.textContent = this.tooltipText;
+        // tooltipElement.textContent = this.tooltipText;
+        // tooltipElement.innerHTML = '<h2>Tooltip</h2><p>' + this.tooltipText + '</p>';
+
+        // In order to eliminate the use of HTML in our JS file we can use the template tag in the HTML file.
+        const tooltipTemplate = document.getElementById('tooltip');
+        const tooltipBody = document.importNode(tooltipTemplate.content, true);
+        tooltipBody.querySelector('p').textContent = this.tooltipText;
+        tooltipElement.append(tooltipBody);
+
+        // You can use more than one template tag in the HTML file.
+        // const tooltipTemplate1 = document.getElementById('test-tag');
+        // const tooltipBody1 = document.importNode(tooltipTemplate1.content, true);
+        // tooltipBody1.querySelector('p').textContent = 'test';
+        // tooltipElement.append(tooltipBody1);
 
         const hostElementPositionLeft = this.hostElement.offsetLeft;
         const hostElementPositionTop = this.hostElement.offsetTop;
@@ -151,13 +166,38 @@ class ProjectList {
 }
 
 class App {
+    timer = function () { };
+
     static init() {
         const activeProjectList = new ProjectList('active');
         const finishedProjectList = new ProjectList('finished');
 
         activeProjectList.setSwitchHandlerFunction(finishedProjectList.addProject.bind(finishedProjectList));
         finishedProjectList.setSwitchHandlerFunction(activeProjectList.addProject.bind(activeProjectList));
+
+        // this.loadScripts();
+        // If you want to pass arguments to the loadScripts method you can pass them as an object as shown below.
+        this.timer = setTimeout(this.loadScripts, 2000, { once: true });
+    }
+
+    static loadScripts(once = false) {
+        if (once) {
+            // Adding scripts dynamically using JS.
+            const script = document.createElement('script');
+            script.src = 'https://use.fontawesome.com/releases/v5.15.3/js/all.js';
+            script.defer = true;
+            document.head.append(script);
+
+            const analytics = document.createElement('script');
+            analytics.src = 'assets/scripts/analytics.js';
+            analytics.defer = true;
+            document.head.append(analytics);
+
+            clearTimeout(this.timer);
+        }
     }
 }
 
 App.init();
+
+navigator.geolocation.getCurrentPosition((data) => {console.log(data)});
